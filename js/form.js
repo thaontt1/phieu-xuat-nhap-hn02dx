@@ -23,10 +23,15 @@ function applyLoai(loai) {
   badge.className = 'hdr-badge ' + LOAI;
   show(badge, true);
 
-  $('hdrKhoiKho').textContent = n.khoi;
+$('hdrKhoiKho').textContent = n.khoi;
+
+  // Phiếu nhập: ẩn hẳn ô Tỉnh — GHN không cần theo dõi tỉnh nhập về, khác
+  // với phiếu xuất phải ghi rõ xuất đi tỉnh nào.
+  show($('fieldTinh'), LOAI !== 'nhap');
+  $('tinh').required = (LOAI !== 'nhap');
 
   // Nhãn có dấu * bắt buộc — dựng lại cả phần <span> để không mất dấu sao.
-  $('lblTinh').innerHTML = escHtml(n.tinh) + ' <span class="req"></span>';
+  $('lblTinh').innerHTML = escHtml(n.tinh) + ' <span class="req">*</span>';
   $('lblNguoi').innerHTML = escHtml(n.nguoi) + ' <span class="req">*</span>';
   $('tinh').placeholder = n.phVeTinh;
   $('nguoi').placeholder = n.phVeNguoi;
