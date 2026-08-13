@@ -26,7 +26,7 @@ function applyLoai(loai) {
   $('hdrKhoiKho').textContent = n.khoi;
 
   // Nhãn có dấu * bắt buộc — dựng lại cả phần <span> để không mất dấu sao.
-  $('lblTinh').innerHTML = escHtml(n.tinh) + ' <span class="req">*</span>';
+  $('lblTinh').innerHTML = escHtml(n.tinh) + ' <span class="req"></span>';
   $('lblNguoi').innerHTML = escHtml(n.nguoi) + ' <span class="req">*</span>';
   $('tinh').placeholder = n.phVeTinh;
   $('nguoi').placeholder = n.phVeNguoi;
@@ -104,7 +104,6 @@ function validateClient(p) {
   need('bienSoXe', 'Biển số xe');
   need('sealXe', 'Seal xe');
   need('cua', 'Cửa');
-  need('tinh', n.tinh);
   need('nguoi', n.nguoi);
 
   if (['xuat', 'nhap'].indexOf(p.loai) < 0) {
