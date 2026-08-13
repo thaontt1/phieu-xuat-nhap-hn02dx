@@ -180,20 +180,12 @@ function openScanner(targetId, mode) {
   scanCore.setHints(scanHints_());
 
   // Xin phân giải cao: mã Code128 dày vạch, ở 640x480 gần như không đọc nổi.
-  //
-  // ⚠️ KHÔNG ép focusMode:'continuous' ngay trong constraint mở camera (13/08).
-  //    Một số WebView Android xử lý sai constraint nâng cao này: thay vì bỏ qua
-  //    khi không hỗ trợ như spec yêu cầu, máy khoá cứng focus ở khoảng cách cố
-  //    định (thường là macro/gần) → ảnh mờ đều, quét live lẫn "chụp để quét"
-  //    đều không đọc nổi vì cùng lấy hình từ track camera bị khoá focus sai.
-  //    Xin stream KHÔNG kèm focusMode trước, mở camera xong mới thử áp
-  //    continuous qua applyConstraints() riêng — hỏng thì bắt lỗi ở đó, không
-  //    kéo sập luôn cả camera.
   navigator.mediaDevices.getUserMedia({
     video: {
       facingMode: { ideal: 'environment' },
       width: { ideal: 1920 },
-      height: { ideal: 1080 }
+      height: { ideal: 1080 },
+      advanced: [{ focusMode: 'continuous' }]
     }
   }).then(function (stream) {
     scanStream = stream;
@@ -203,9 +195,7 @@ function openScanner(targetId, mode) {
     v.srcObject = stream;
     v.play().catch(function () { /* iOS đôi khi kén, autoplay+muted lo phần này */ });
 
-    setupFocus();
     setupZoom();
-    warnLowRes();
     $('scanTip').textContent = scanMode === 'append'
       ? 'Quét lần lượt từng mã kiện — xong hết thì bấm "Xong"'
       : 'Đưa mã vạch nằm NGANG vào dải sáng, cho mã chiếm gần hết bề ngang';
@@ -215,40 +205,6 @@ function openScanner(targetId, mode) {
     $('scanTip').textContent = 'Không mở được camera: ' +
       (e && e.name ? e.name : e) + ' — dùng nút "Chụp để quét" hoặc nhập tay.';
   });
-}
-
-/**
- * Bật lấy nét liên tục SAU KHI đã có camera, tách riêng khỏi getUserMedia
- * (xem chú thích ở openScanner). Máy không hỗ trợ / từ chối thì bỏ qua lặng
- * lẽ — video vẫn chạy bằng focus mặc định của máy, còn hơn mất cả luồng hình.
- */
-function setupFocus() {
-  if (!scanTrack || !scanTrack.getCapabilities) return;
-  try {
-    var caps = scanTrack.getCapabilities();
-    if (caps.focusMode && caps.focusMode.indexOf('continuous') >= 0) {
-      scanTrack.applyConstraints({ advanced: [{ focusMode: 'continuous' }] })
-        .catch(function () { /* máy từ chối thì giữ nguyên focus mặc định */ });
-    }
-  } catch (e) { /* getCapabilities lỗi trên vài trình duyệt cũ — bỏ qua */ }
-}
-
-/**
- * Cảnh báo mềm khi độ phân giải thực nhận được thấp hơn nhiều so với 1920x1080
- * đã xin — nhiều máy Android tầm trung tự hạ xuống 1280x720 hoặc thấp hơn dù
- * "ideal" đã xin cao. Mã Code128 cần ≥2 điểm ảnh/module nên phân giải thấp là
- * lý do trực tiếp khiến zoom 2x vẫn không đọc nổi.
- */
-function warnLowRes() {
-  var v = $('scanVideo');
-  setTimeout(function () {
-    if (!v.videoWidth) return;
-    if (v.videoWidth < 1280) {
-      $('scanTip').textContent =
-        'Camera máy này chỉ cho độ phân giải thấp (' + v.videoWidth + 'x' + v.videoHeight +
-        ') — đưa mã lại gần camera hơn hoặc dùng nút "Chụp để quét".';
-    }
-  }, 500);
 }
 
 /**
@@ -301,28 +257,6 @@ function toggleTorch() {
 }
 
 /**
- * Thử decode 1 canvas bằng HybridBinarizer trước (tốt với ánh sáng đều), hỏng
- * thì thử lại ngay bằng GlobalHistogramBinarizer (chịu ánh sáng không đều /
- * bóng đèn kho tốt hơn ở một số ca, nhất là tem in nhiệt mờ/trầy). Chi phí
- * thêm không đáng kể vì chỉ chạy lần 2 khi lần 1 đã thất bại.
- */
-function decodeCanvas_(canvas) {
-  var src = new ZXing.HTMLCanvasElementLuminanceSource(canvas);
-
-  try {
-    var bmp1 = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(src));
-    return scanCore.decode(bmp1).getText();
-  } catch (e1) { /* thử binarizer khác bên dưới */ }
-
-  try {
-    var bmp2 = new ZXing.BinaryBitmap(new ZXing.GlobalHistogramBinarizer(src));
-    return scanCore.decode(bmp2).getText();
-  } catch (e2) { /* khung hình thật sự không có mã đọc được — bỏ qua */ }
-
-  return null;
-}
-
-/**
  * Một lượt dò: cắt dải ngang giữa khung hình rồi đưa xuống lớp thấp của ZXing.
  * Không dùng requestAnimationFrame — dò xong mới hẹn lượt kế, để máy yếu không
  * bị dồn việc.
@@ -349,20 +283,20 @@ function scanTick() {
   var ctx = scanCanvas.getContext('2d', { willReadFrequently: true });
   ctx.drawImage(v, 0, sy, w, bandH, 0, 0, w, bandH);
 
-  var text = decodeCanvas_(scanCanvas);
-  if (text) onScanned(text);
+  try {
+    var src = new ZXing.HTMLCanvasElementLuminanceSource(scanCanvas);
+    var bmp = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(src));
+    var res = scanCore.decode(bmp);
+    if (res) onScanned(res.getText());
+  } catch (e) {
+    // Khung hình không có mã → NotFoundException. Chuyện thường, bỏ qua.
+  }
   try { scanCore.reset(); } catch (e) { /* không sao */ }
 
   if (scanStream) scanLoopId = setTimeout(scanTick, 60);
 }
 
-/**
- * Chụp 1 ảnh tĩnh rồi giải mã — cứu ca mã mờ hoặc chụp qua màn hình.
- * Dùng chung decodeCanvas_() với đường live (thử HybridBinarizer rồi
- * GlobalHistogramBinarizer) thay vì decodeFromImageUrl mặc định của thư viện
- * — trước đây chỉ thử 1 binarizer nên bỏ lỡ đúng những ca tem mờ mà nút này
- * sinh ra để cứu.
- */
+/** Chụp 1 ảnh tĩnh rồi giải mã — cứu ca mã mờ hoặc chụp qua màn hình. */
 function onScanShot(ev) {
   var file = (ev.target.files || [])[0];
   ev.target.value = '';
@@ -371,31 +305,13 @@ function onScanShot(ev) {
   $('scanTip').textContent = 'Đang đọc mã từ ảnh…';
   var reader = new FileReader();
   reader.onload = function () {
-    var img = new Image();
-    img.onload = function () {
-      var c = document.createElement('canvas');
-      c.width = img.naturalWidth;
-      c.height = img.naturalHeight;
-      c.getContext('2d').drawImage(img, 0, 0);
-
-      if (!scanCore) {
-        scanCore = new ZXing.MultiFormatReader();
-        scanCore.setHints(scanHints_());
-      }
-      var text = decodeCanvas_(c);
-      try { scanCore.reset(); } catch (e) { /* không sao */ }
-
-      if (text) {
-        onScanned(text);
-      } else {
+    var r = new ZXing.BrowserMultiFormatReader(scanHints_());
+    r.decodeFromImageUrl(reader.result)
+      .then(function (result) { onScanned(result.getText()); })
+      .catch(function () {
         $('scanTip').textContent =
           'Không đọc được mã trong ảnh. Chụp lại gần hơn, đủ sáng, mã nằm ngang và không bị loá.';
-      }
-    };
-    img.onerror = function () {
-      $('scanTip').textContent = 'Ảnh lỗi, không đọc được. Chụp lại giúp mình.';
-    };
-    img.src = reader.result;
+      });
   };
   reader.readAsDataURL(file);
 }
