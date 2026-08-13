@@ -26,7 +26,7 @@ var CONFIG = {
   //    HUONG_DAN_TUNG_BUOC.md) thì dán URL /exec vào đây rồi mới push repo.
   //    TUYỆT ĐỐI không dán URL của HY01 vào — phiếu 2 kho mới sẽ chạy vào Sheet
   //    và nhóm Telegram của HY01 mà KHÔNG báo lỗi gì.
-  API_URL: 'https://script.google.com/a/macros/ghn.vn/s/AKfycbz_OlJqJvPiGyN6Z3ulODhr5-lDlrNUJe34ZcovKOaQnwcc2P685sQMvuT-Hpxol-S-MA/exec',
+  API_URL: 'https://script.google.com/a/macros/ghn.vn/s/AKfycbwL3N9cT6RwDS-LALqQWwR13EDfe5KZw1Y39h9zK9L39a6TZvcMDiGG_Vz-p1h7EpSm2Q/exec',
 
   // 0 = không giới hạn số ảnh.
   // ⚠️ Trang này KHÔNG hỏi backend lúc mở ⇒ con số này độc lập với MAX_PHOTOS trong
