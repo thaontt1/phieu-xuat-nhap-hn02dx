@@ -88,6 +88,16 @@
         <p class="hint" id="khoHint">Quét đúng tem QR dán tại kho thì ô này tự điền sẵn.</p>
       </div>
 
+      <!-- Ca: thêm 13/08, người lập phiếu TỰ CHỌN — không suy từ giờ máy, không
+           đọc từ tem QR (khác Kho). Để trống là chặn gửi (máy + server), vì
+           đây là tiêu chí định tuyến nhóm Telegram cho HN02/Dương Xá. -->
+      <div class="field">
+        <label for="ca">Ca làm việc <span class="req">*</span></label>
+        <select id="ca" required>
+          <option value="">— Chọn ca —</option>
+        </select>
+      </div>
+
       <div class="field">
         <label for="cua">Cửa <span class="req">*</span></label>
         <input id="cua" type="text" autocapitalize="characters"
