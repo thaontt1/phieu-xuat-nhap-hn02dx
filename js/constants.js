@@ -18,6 +18,13 @@ var KHO = '';
 var DS_KHO = ['Hà Nội 02', 'Dương Xá'];
 
 /**
+ * Ca làm việc — người lập phiếu tự chọn (13/08), KHÔNG suy từ giờ hệ thống vì
+ * ca thực tế lệch giờ hành chính. Giữ khớp ĐÚNG CHUỖI với các nhánh ['Ca 1',
+ * 'Ca 2', 'Ca 3'] trong hcDanhSachNhom_() / testTelegram() bên apps_script.
+ */
+var DS_CA = ['Ca 1', 'Ca 2', 'Ca 3'];
+
+/**
  * Chữ hiển thị theo loại phiếu.
  *
  * Toàn bộ khác biệt giữa phiếu XUẤT và phiếu NHẬP nằm gọn trong bảng này —
