@@ -23,7 +23,7 @@ function applyLoai(loai) {
   badge.className = 'hdr-badge ' + LOAI;
   show(badge, true);
 
-$('hdrKhoiKho').textContent = n.khoi;
+  $('hdrKhoiKho').textContent = n.khoi;
 
   // Phiếu nhập: ẩn hẳn ô Tỉnh — GHN không cần theo dõi tỉnh nhập về, khác
   // với phiếu xuất phải ghi rõ xuất đi tỉnh nào.
@@ -35,6 +35,21 @@ $('hdrKhoiKho').textContent = n.khoi;
   $('lblNguoi').innerHTML = escHtml(n.nguoi) + ' <span class="req">*</span>';
   $('tinh').placeholder = n.phVeTinh;
   $('nguoi').placeholder = n.phVeNguoi;
+}
+
+/**
+ * Ô "Ca" — thêm 13/08, dùng cho định tuyến nhóm Telegram của HN02/Dương Xá.
+ * KHÔNG tự chọn sẵn (giống lý do renderKho() không tự chọn kho): mở link
+ * trần rồi lẳng lặng chọn "Ca 1" là phiếu ghi sai ca mà không ai biết.
+ */
+function renderCa() {
+  var sel = $('ca');
+  DS_CA.forEach(function (v) {
+    var o = document.createElement('option');
+    o.value = v;
+    o.textContent = v;
+    sel.appendChild(o);
+  });
 }
 
 /**
@@ -73,6 +88,7 @@ function collect() {
   return {
     loai: LOAI,
     kho: $('kho').value.trim(),
+    ca: $('ca').value.trim(),
     maChuyenDi: $('maChuyenDi').value.trim().toUpperCase(),
     bienSoXe: $('bienSoXe').value.trim().toUpperCase(),
     sealXe: $('sealXe').value.trim().toUpperCase(),
@@ -105,10 +121,12 @@ function validateClient(p) {
 
   var n = NHAN[LOAI] || NHAN.xuat;
   need('kho', 'Kho');
+  need('ca', 'Ca làm việc');
   need('maChuyenDi', 'Mã chuyến đi');
   need('bienSoXe', 'Biển số xe');
   need('sealXe', 'Seal xe');
   need('cua', 'Cửa');
+  if (LOAI !== 'nhap') need('tinh', n.tinh); // Phiếu nhập: ô Tỉnh đã ẩn hẳn, không kiểm.
   need('nguoi', n.nguoi);
 
   if (['xuat', 'nhap'].indexOf(p.loai) < 0) {
