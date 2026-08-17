@@ -64,7 +64,7 @@
       <div class="field">
         <label for="sealXe">Seal xe <span class="req">*</span></label>
         <div class="scan-row">
-          <input id="sealXe" type="text" autocapitalize="characters"
+          <input id="sealXe" type="text" inputmode="numeric" pattern="[0-9]*"
                  placeholder="VD: 0524019227" required>
           <button type="button" class="btn-scan" data-scan="sealXe"
                   aria-label="Quét mã vạch seal xe">📷</button>
@@ -98,10 +98,36 @@
         </select>
       </div>
 
+<div class="field">
+        <label for="ca">Ca làm việc <span class="req">*</span></label>
+        <select id="ca" required>
+          <option value="">— Chọn ca —</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="tinhTrang">Tình trạng <span class="req">*</span></label>
+        <select id="tinhTrang" required>
+          <option value="">— Chọn tình trạng —</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="soKien">Số kiện <span class="req">*</span></label>
+        <input id="soKien" type="text" inputmode="numeric" pattern="[0-9]*"
+               placeholder="VD: 120" required>
+      </div>
+
+      <div class="field">
+        <label for="tyLeLapDay">Tỷ lệ lấp đầy (%) <span class="req">*</span></label>
+        <input id="tyLeLapDay" type="text" inputmode="numeric" pattern="[0-9]*"
+               placeholder="VD: 80" required>
+      </div>
+
       <div class="field">
         <label for="cua">Cửa <span class="req">*</span></label>
-        <input id="cua" type="text" autocapitalize="characters"
-               placeholder="VD: A09" required>
+        <input id="cua" type="text" inputmode="numeric" pattern="[0-9]*"
+               placeholder="09" required>
       </div>
 
       <div class="field" id="fieldTinh">
