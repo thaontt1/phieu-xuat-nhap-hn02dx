@@ -53,6 +53,20 @@ function renderCa() {
 }
 
 /**
+ * Ô "Tình trạng" — thêm 14/08. KHÔNG tự chọn sẵn, cùng lý do với renderKho()
+ * và renderCa(): lẳng lặng chọn sẵn "Nguyên seal" là dữ liệu sai mà không ai biết.
+ */
+function renderTinhTrang() {
+  var sel = $('tinhTrang');
+  DS_TINH_TRANG.forEach(function (v) {
+    var o = document.createElement('option');
+    o.value = v;
+    o.textContent = v;
+    sel.appendChild(o);
+  });
+}
+
+/**
  * Ô "Kho" — chỉ có ở cụm HN02 + Dương Xá, bản HY01 KHÔNG có.
  *
  * ⚠️ KHÔNG tự chọn sẵn kho đầu danh sách. Quét nhầm tem / mở link trần mà form
@@ -89,6 +103,9 @@ function collect() {
     loai: LOAI,
     kho: $('kho').value.trim(),
     ca: $('ca').value.trim(),
+    tinhTrang: $('tinhTrang').value.trim(),
+    soKien: $('soKien').value.trim(),
+    tyLeLapDay: $('tyLeLapDay').value.trim(),
     maChuyenDi: $('maChuyenDi').value.trim().toUpperCase(),
     bienSoXe: $('bienSoXe').value.trim().toUpperCase(),
     sealXe: $('sealXe').value.trim().toUpperCase(),
@@ -122,6 +139,9 @@ function validateClient(p) {
   var n = NHAN[LOAI] || NHAN.xuat;
   need('kho', 'Kho');
   need('ca', 'Ca làm việc');
+  need('tinhTrang', 'Tình trạng');
+  need('soKien', 'Số kiện');
+  need('tyLeLapDay', 'Tỷ lệ lấp đầy');
   need('maChuyenDi', 'Mã chuyến đi');
   need('bienSoXe', 'Biển số xe');
   need('sealXe', 'Seal xe');
